@@ -14,11 +14,14 @@ app = Flask(__name__)  # crea la aplicacion, aqui arranca todo
 # clave secreta
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "clave-para-no-se-que-pero-vi-que-se-necesita")
 
-# si existe database_url usa postgresql si no usa sqlite
+# si existe DATABASE_URL usa postgresql si no usa sqlite
 db_url = os.environ.get("DATABASE_URL", "sqlite:///agenda.db")
 if db_url.startswith("postgres://"):
-    # algunos servicios dan la URL con "postgres://" y SQLAlchemy quiere "postgresql://" se corrige (creo, algo asi entendi :()
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+    # algunos servicios dan la URL con "postgres://" y SQLAlchemy quiere "postgresql+psycopg2://"
+    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif db_url.startswith("postgresql://"):
+    # Neon da la URL como "postgresql://", así que también la pasamos a psycopg2
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
 # 2 mb por imagen
