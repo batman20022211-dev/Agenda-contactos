@@ -1,0 +1,20 @@
+{% extends "base.html" %}  <!-- hereda el esqueleto de base.html  -->
+{% block contenido %}  <!-- inicio del hueco donde va el contenido de esta página -->
+<!-- formulario para crear cuenta -->
+<section class="tarjeta centrada">  <!-- tarjetita centrada, como las demás -->
+  <h1>Crear cuenta</h1>
+  <!-- method="post": manda los datos a la ruta /registro de app.py -->
+  <form method="post" class="formulario">
+    <label>Usuario
+      <input type="text" name="nombre_usuario" required>  <!-- required: no deja mandar el formulario vacío -->
+    </label>
+    <!-- minlength="6": el navegador ya te avisa si la contraseña es muy corta (app.py lo vuelve a revisar, por si acaso ) -->
+    <label>Contraseña (mínimo 6 caracteres)
+      <input type="password" name="password" minlength="6" required>  <!-- type="password" = puntitos, nada de mirar la contraseña por encima del hombro  -->
+    </label>
+    <button class="boton" type="submit">Registrarme</button>  <!-- manda el formulario y crea la cuenta -->
+  </form>
+  <!-- para quien ya tiene cuenta: lleva al login -->
+  <p class="texto-centro">¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+</section>
+{% endblock %}  <!-- fin del hueco -->

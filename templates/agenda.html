@@ -1,0 +1,86 @@
+{% extends "base.html" %}  <!-- hereda el esqueleto de base.html  -->
+{% block contenido %}  <!-- inicio del hueco para el contenido de la agenda -->
+
+<!-- cabecera -->
+<!-- el título y el botón para agregar contacto, uno a cada lado -->
+<div class="cabecera-agenda">
+  <h1>Mis contactos</h1>
+  <!-- url_for('nuevo_contacto') arma la ruta a la página de nuevo contacto (la de app.py) -->
+  <a href="{{ url_for('nuevo_contacto') }}" class="boton">+ Nuevo contacto</a>
+</div>
+
+<!-- buscador: al dar Enter (o la tecla "Buscar" del teclado del celular) se manda el formulario -->
+<form method="get" class="buscador">
+  <input type="hidden" name="cat" value="{{ cat }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="🔍Buscar por nombre, teléfono o correo">
+</form>
+
+<!-- botones para filtrar por categoria -->
+<!-- cada chip es un enlace que cambia la URL con ?cat=..., y el q se mantiene para no perder la búsqueda -->
+<nav class="filtros">
+  <!-- "Todas" quita el filtro de categoría; la clase "activo" lo resalta si no hay categoría elegida -->
+  <a href="{{ url_for('index', q=q) }}" class="chip {% if not cat %}activo{% endif %}">Todas</a>
+  {% for categoria in categorias %}  <!-- una vuelta por cada categoría (Familia, Escuela, Trabajo, Otro) -->
+    <!-- cat-{{ categoria|lower }} le pone el color de esa categoría; |lower pasa el texto a minúsculas (Familia -> familia) -->
+    <a href="{{ url_for('index', q=q, cat=categoria) }}"
+       class="chip cat-{{ categoria|lower }} {% if cat == categoria %}activo{% endif %}">{{ categoria }}</a>  <!-- el chip de la categoría que está elegida se resalta -->
+  {% endfor %}
+</nav>
+
+<!-- si hay contactos, los pintamos; si no, mostramos un mensajito triste -->
+{% if contactos %}  <!-- la lista que mandó app.py: si está vacía, esto es falso -->
+  <div class="lista">  <!-- la cuadrícula donde van todas las tarjetas -->
+    {% for c in contactos %}  <!-- una tarjeta por cada contacto; "c" es el contacto de esta vuelta -->
+      <article class="tarjeta contacto">  <!-- la tarjeta del contacto. El color cambia solito según su posición en la lista -->
+
+        <!-- foto pequeña a la izquierda del nombre -->
+        <div class="encabezado-contacto">
+          {% if c.imagen %}  <!-- si tiene foto guardada (la que viaja en base64) la mostramos -->
+            <img class="foto" src="{{ c.imagen }}" alt="Foto de {{ c.nombre }}">  <!-- alt es el texto por si la foto no carga o la lee un lector de pantalla  -->
+          {% else %}
+            <!-- si no hay imagen, muestra un emoji -->
+            <span class="foto foto-vacia">👤</span>  <!-- el fantasma de la foto: un monito genérico -->
+          {% endif %}
+          <div class="titulo-contacto">
+            <h2>{{ c.nombre }}</h2>  <!-- el nombre del contacto, en grande -->
+            <!-- etiqueta con la categoria -->
+            <span class="etiqueta cat-{{ c.categoria|lower }}">{{ c.categoria }}</span>  <!-- la etiquetita de color: Familia, Escuela, etc. -->
+          </div>
+        </div>
+
+        <!-- el código de país y el teléfono; por ejemplo: +52 5512345678 -->
+        <p> {{ c.codigo_pais }} {{ c.telefono }}</p>
+        <p> {{ c.correo }}</p>
+
+        <!-- botones: llamar, escribir, editar y eliminar -->
+        <div class="acciones">
+          <!-- tel: abre la llamada en el celular -->
+          <!-- el enlace tel: junta el código y el número sin espacios (+525512345678), que es como el celular lo entiende -->
+          <a href="tel:{{ c.codigo_pais }}{{ c.telefono }}" class="boton boton-suave"> Llamar</a>
+          <!-- mailto: abre el correo para escribir -->
+          <a href="mailto:{{ c.correo }}" class="boton boton-suave"> Escribir</a>
+          <!-- a la página de editar, con el id de ESTE contacto en la URL -->
+          <a href="{{ url_for('editar_contacto', id=c.id) }}" class="boton boton-suave">Editar</a>
+          <!-- eliminar es un formulario, no un enlace, porque app.py solo borra con POST (¡no por accidente con un clic!) -->
+          <form method="post" action="{{ url_for('eliminar_contacto', id=c.id) }}"
+                onsubmit="return confirm('¿Eliminar este contacto?');">  <!-- confirm() muestra "¿seguro?"; si dices que no, no se manda nada  -->
+            <button class="boton boton-peligro" type="submit">Eliminar</button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}  <!-- fin de la vuelta por los contactos -->
+  </div>
+{% else %}
+  {% if not q and not cat %}
+    <!-- de verdad no hay ningún contacto todavía -->
+    <div class="vacio">
+      <p>Aún no tienes contactos 🥺</p>
+      <a href="{{ url_for('nuevo_contacto') }}" class="boton">Agrega el primero</a>
+    </div>
+  {% else %}
+    <!-- sí hay contactos, pero ninguno cumple el filtro o la búsqueda -->
+    <p class="texto-centro">No hay contactos con estos filtros 🥺</p>
+  {% endif %}
+{% endif %}
+
+{% endblock %}  <!-- fin del hueco -->

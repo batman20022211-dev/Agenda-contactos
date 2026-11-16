@@ -1,0 +1,74 @@
+{% extends "base.html" %}  <!-- hereda el esqueleto de base.html -->
+{% block contenido %}  <!-- inicio del hueco -->
+
+<!-- formulario para crear o editar un contacto -->
+<!-- la misma plantilla sirve para los dos casos: si llega "contacto", estamos editando; si no, es uno nuevo -->
+<section class="tarjeta centrada">
+  <h1>{{ titulo }}</h1>  <!-- "Nuevo contacto" o "Editar contacto", según lo que mande app.py -->
+
+  <!-- enctype es para poder subir imagenes -->
+  <!-- sin enctype="multipart/form-data" la foto NO viajaría, y app.py se quedaría sin nada que guardar  -->
+  <form method="post" enctype="multipart/form-data" class="formulario">
+
+    <!-- el nombre; si estamos editando, value trae el nombre que ya tenía -->
+    <label>Nombre
+      <!-- "contacto.nombre if contacto else ''": si hay contacto (editando) pone su nombre; si no, deja el campo vacío -->
+      <input type="text" name="nombre" value="{{ contacto.nombre if contacto else '' }}" required>
+    </label>
+
+    <!-- telefono con selector de lada -->
+    <label>Teléfono (10 números)
+      <div class="grupo-telefono">  <!-- el selector y el número van lado a lado (en celu, uno abajo del otro) -->
+        <!-- el selector de lada: la lista CODIGOS viene de app.py -->
+        <select name="codigo_pais">
+          {% for codigo, texto in codigos %}  <!-- codigo es lo que se guarda (+52) y texto es lo que se ve (México (+52)) -->
+            <!-- selected marca la lada que ya tenía el contacto, para que aparezca elegida al editar -->
+            <option value="{{ codigo }}" {% if contacto and contacto.codigo_pais == codigo %}selected{% endif %}>
+              {{ texto }}
+            </option>
+          {% endfor %}
+        </select>
+        <!-- solo deja escribir numeros, exactamente 10 -->
+        <!-- type="tel" abre el teclado numérico en el celu; pattern, maxlength y el oninput son tres capas de "solo números, 10 nada más"  -->
+        <!-- el oninput borra cualquier cosa que no sea número mientras escribes (\D = todo lo que NO es dígito) -->
+        <input type="tel" name="telefono" value="{{ contacto.telefono if contacto else '' }}"
+               inputmode="numeric" pattern="[0-9]{10}" maxlength="10"
+               title="Escribe exactamente 10 números"
+               oninput="this.value = this.value.replace(/\D/g, '')" required>
+      </div>
+    </label>
+
+    <!-- el correo; type="email" hace que el navegador revise que tenga forma de correo (arroba y todo ) -->
+    <label>Correo
+      <input type="email" name="correo" value="{{ contacto.correo if contacto else '' }}" required>
+    </label>
+
+    <!-- categoria del contacto -->
+    <label>Categoría
+      <select name="categoria">
+        {% for categoria in categorias %}  <!-- una opción por cada categoría de app.py -->
+          <!-- se marca como elegida: la que ya tenía el contacto; o "Otro" si es nuevo (es el default) -->
+          <option value="{{ categoria }}"
+            {% if (contacto and contacto.categoria == categoria) or (not contacto and categoria == 'Otro') %}selected{% endif %}>
+            {{ categoria }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <!-- al crear la imagen es obligatoria -->
+    <!-- al editar es opcional: si no subes nada, app.py conserva la foto que ya tenía -->
+    <label>Imagen {% if contacto %}(opcional, deja vacío para conservar la actual){% endif %}
+      <!-- accept="image/*" le sugiere al navegador que solo muestre imágenes para elegir (app.py igual revisa el tipo) -->
+      <input type="file" name="imagen" accept="image/*" {% if not contacto %}required{% endif %}>  <!-- required solo si es contacto nuevo -->
+    </label>
+
+    <div class="acciones">
+      <button class="boton" type="submit">Guardar</button>  <!-- manda todo el formulario a app.py -->
+      <!-- Cancelar: solo es un enlace de regreso a la agenda, no guarda nada -->
+      <a href="{{ url_for('index') }}" class="boton boton-suave">Cancelar</a>
+    </div>
+  </form>
+</section>
+
+{% endblock %}  <!-- fin del hueco -->

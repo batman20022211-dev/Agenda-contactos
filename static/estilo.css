@@ -1,0 +1,514 @@
+/* aqui viven los colores, tamaños y toda la pinta de la agenda
+  los colores estan guardados en "variables" (--algo) y cambian segun el modo claro u oscuro */
+
+/* colores del modo claro (por defecto) */
+/* estas son las variables de color: se definen una vez aqui y se usan en todo el archivo con var(--nombre) */
+:root {
+  --fondo: #fdf6f0;  /* el color de fondo de toda la pagina, un crema suavecito */
+  --rosa: #f9d5e5;  /* rosa pastel, para botones y bordes de foto */
+  --menta: #d5f5e3;  /* verde menta, para el fondo del monito de "sin foto" */
+  --lila: #e3d5f9;  /* lila, para la barra de arriba y los chips */
+  --azul: #d5e8f9;  /* azul, para botones "suaves" */
+  --amarillo: #fdf3c4;  /* amarillo mantequilla, para los avisos */
+  --texto: #5a4a5e;  /* color del texto un morado grisaceo */
+  --borde: #ecdff0;  /* bordes finitos de tarjetas e inputs */
+  --sombra: 0 4px 12px rgba(150, 120, 170, 0.15);  /* la sombrita de las tarjetas */
+  --tarjeta: #ffffff;  /* fondo de las tarjetas */
+  --campo: #fffafc;  /* fondo de los campos para escribir casi blanco con un toque rosita */
+  --tono1: #fff7fb;  /* tonos para alternar el color de cada tarjeta de contacto */
+  --tono2: #f5fdf9;
+  --tono3: #f7f3fe;
+  --tono4: #f2f8fe;
+  --cat-familia: #f9d5e5;  /* colores de cada categoria (etiquetas) */
+  --cat-escuela: #d5e8f9;
+  --cat-trabajo: #d5f5e3;
+  --cat-otro: #e3d5f9;
+  --lampara-pantalla: #e3d5f9;  /* color de la pantalla de la lampara del login */
+  --enlace: #7a5cc4;  /* morado para los enlaces */
+}
+
+/* colores del modo oscuro (se activa con el boton o con la lampara) */
+/* mismas variables que arriba, pero con colores oscuros Asi la página cambia de modo sin tocar ni una regla mas */
+:root[data-tema="oscuro"] {
+  --fondo: #1e1b26;  /* fondo casi negro */
+  --rosa: #5b3f57;
+  --menta: #2f4a40;
+  --lila: #3a3050;
+  --azul: #2f3f5a;
+  --amarillo: #5a4d2a;
+  --texto: #ece6f2;  /* texto clarito para que se lea en fondo oscuro */
+  --borde: #3d3550;
+  --sombra: 0 4px 12px rgba(0, 0, 0, 0.35);  /* en oscuro la sombra tiene que ser mas negra para que se note */
+  --tarjeta: #272233;
+  --campo: #2f2839;
+  --tono1: #33243a;
+  --tono2: #22342d;
+  --tono3: #2c2640;
+  --tono4: #232d40;
+  --cat-familia: #6b4560;
+  --cat-escuela: #3d5170;
+  --cat-trabajo: #3d6a55;
+  --cat-otro: #4d3f6b;
+  --lampara-pantalla: #3a3050;
+  --enlace: #c9b3ff;  /* el morado de los enlaces se aclara para que se vea en oscuro */
+}
+
+/* general */
+body {
+  margin: 0;  /* quita el margen que el navegador le pone por default */
+  font-family: "Segoe UI", Roboto, sans-serif;  /* tipografia primero Segoe UI (Windows), luego Roboto (Android), y si no, la generica sans */
+  background: var(--fondo);
+  color: var(--texto);
+  transition: background 0.3s, color 0.3s;  /* el cambio de modo se ve suavecito, no de golpe */
+}
+
+a {
+  color: var(--enlace);  /* todos los enlaces usan el color de enlace del modo actual */
+}
+
+/* barra superior */
+.barra {
+  display: flex;  /* acomoda sus cosas en fila */
+  justify-content: space-between;  /* logo a la izquierda, botones a la derecha */
+  align-items: center;  /* todo centradito en vertical */
+  flex-wrap: wrap;  /* si no cabe, se baja a otra línea (celular) */
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--lila);
+  box-shadow: var(--sombra);
+}
+
+.logo {
+  font-weight: bold;  /* en negrita, como debe ser un logo */
+  font-size: 1.3rem;  /* un poquito más grande que el texto normal */
+  color: var(--texto);
+  text-decoration: none;  /* sin subrayado de enlace */
+}
+
+.barra-derecha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+/* saludo: en escritorio queda a la izquierda de los botones */
+.saludo {
+  margin-left: auto;
+}
+/* contenedor */
+/* la caja que centra todo el contenido y no deja que se estire infinito en pantallas gigantes */
+.contenedor {
+  max-width: 1000px;  /* ancho máximo */
+  margin: 20px auto;  /* el "auto" a los lados la centra */
+  padding: 0 15px;  /* un poquito de aire a los lados */
+}
+
+/* tarjetas */
+.tarjeta {
+  background: var(--tarjeta);
+  border-radius: 16px;  /* esquinas redondeadas */
+  padding: 20px;
+  box-shadow: var(--sombra);
+  border: 1px solid var(--borde);
+}
+
+.centrada {
+  max-width: 420px;  /* las tarjetas de login y registro son mas angostitas */
+  margin: 40px auto;  /* centradas y con espacio arriba y abajo */
+}
+
+.texto-centro {
+  text-align: center;
+}
+
+/* botones */
+.boton {
+  display: inline-block;  /* se acomoda en línea, pero le podemos poner padding */
+  background: var(--rosa);
+  color: var(--texto);
+  border: none;  /* sin borde feo */
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;  /* la manita de "aquí se puede dar clic" */
+  text-decoration: none;  /* para que los botones que son enlaces no tengan subrayado */
+  font-size: 1rem;
+  font-family: inherit;  /* usa la misma letra que el resto de la pagina */
+}
+
+.boton:hover {
+  filter: brightness(0.96);  /* al pasar el mouse se oscurece un poco, para que sepas que responde */
+}
+
+.boton-suave {
+  background: var(--azul);  /* un botón secundario, en azul en vez de rosa */
+}
+
+.boton-peligro {
+  background: #f8c9c9;  /* rojito bajito para cosas delicadas, como eliminar */
+  color: #4a2a2a;
+}
+
+/* mensajes de aviso */
+.aviso {
+  background: var(--amarillo);
+  color: var(--texto);
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+/* formularios */
+.formulario {
+  display: flex;
+  flex-direction: column;  /* un campo abajo del otro */
+  gap: 14px;  /* espacio entre campos */
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;  /* el texto de la etiqueta arriba y el campo abajo */
+  gap: 6px;
+  font-weight: 600;  /* semi-negrita para los títulos de cada campo */
+}
+
+input,
+select {
+  padding: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--campo);
+  color: var(--texto);
+  width: 100%;  /* ocupan todo el ancho disponible */
+  box-sizing: border-box;  /* el padding no le suma ancho extra, así no se salen de la tarjeta */
+}
+
+/* telefono: selector + numero lado a lado */
+.grupo-telefono {
+  display: flex;
+  gap: 8px;
+}
+
+.grupo-telefono select {
+  width: 40%;  /* el selector de lada ocupa 40%... */
+}
+
+.grupo-telefono input {
+  width: 60%;  /* ...y el número el 60% restante */
+}
+
+/* cabecera */
+.cabecera-agenda {
+  display: flex;
+  justify-content: space-between;  /* título a la izquierda, botón a la derecha */
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* buscador */
+.buscador {
+  display: flex;  /* campo y botón en fila */
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.buscador input {
+  flex: 1;  /* el campo de búsqueda se come todo el espacio que sobre */
+}
+
+/* botones de categoria (filtros): en una sola fila; si no caben, se deslizan con el dedo */
+.filtros {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  flex-shrink: 0;  /* que el chip no se encoja */
+  white-space: nowrap;  /* que el texto no se parta en dos líneas */
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: var(--texto);
+  border: 2px solid transparent;
+  background: var(--lila);
+}
+
+.chip.activo {
+  border-color: var(--texto);  /* el chip elegido se rodea con un borde oscuro... */
+  font-weight: bold;  /* y se pone en negrita */
+}
+
+/* colores de cada categoria */
+.cat-familia { background: var(--cat-familia); }
+.cat-escuela { background: var(--cat-escuela); }
+.cat-trabajo { background: var(--cat-trabajo); }
+.cat-otro { background: var(--cat-otro); }
+
+/* etiqueta pequeña con la categoria dentro de la tarjeta */
+.etiqueta {
+  display: inline-block;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-top: 4px;
+  color: var(--texto);
+}
+
+/* lista de contactos en cuadricula */
+/* auto-fill mete tantas columnas como quepan (mínimo 260px cada una) y se reparten el espacio  */
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* tarjeta de contacto con un tono pastel distinto */
+/* nth-child(4n+1) agarra la 1ª, 5ª, 9ª... tarjeta; así cada 4 tarjetas se repite el ciclo de colores */
+.contacto:nth-child(4n+1) { background: var(--tono1); }
+.contacto:nth-child(4n+2) { background: var(--tono2); }
+.contacto:nth-child(4n+3) { background: var(--tono3); }
+.contacto:nth-child(4n+4) { background: var(--tono4); }
+
+/* foto + nombre en una fila */
+.encabezado-contacto {
+  display: flex;
+  align-items: center;  /* la foto y el nombre centrados en vertical */
+  gap: 10px;
+}
+
+.titulo-contacto {
+  display: flex;
+  flex-direction: column;  /* nombre arriba y etiqueta abajo */
+}
+
+.encabezado-contacto h2 {
+  margin: 0;  /* sin el espacio que el navegador pone a los títulos */
+  font-size: 1.1rem;
+}
+
+/* foto pequeña y redonda */
+.foto {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;  /* 50% = círculo perfecto */
+  object-fit: cover;  /* la foto llena el círculo sin deformarse (recorta lo que sobre) */
+  border: 2px solid var(--rosa);
+  flex-shrink: 0;  /* no la dejes encogerse si el nombre es largo */
+}
+
+/* el monito cuando no hay foto */
+.foto-vacia {
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* el emoji centradito dentro del círculo */
+  background: var(--menta);
+  font-size: 1.4rem;
+}
+
+/* botones de la tarjeta */
+.acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.acciones form {
+  margin: 0;  /* el formulario del botón eliminar no mete espacio extra */
+}
+
+/* ---------- lampara del inicio de sesion ---------- */
+/* aquí empieza todo lo de la lámpara que se jala  */
+.zona-lampara {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.lampara {
+  position: relative;  /* las partes de adentro se acomodan respecto a ella */
+  width: 120px;
+  height: 150px;
+  margin: 0 auto;  /* centrada */
+}
+
+/* la pantalla de la lampara */
+.pantalla {
+  position: absolute;  /* la ponemos exactamente donde queramos dentro de la lámpara */
+  top: 0;
+  left: 10px;
+  width: 100px;
+  height: 50px;
+  background: var(--lampara-pantalla);
+  border-radius: 100px 100px 8px 8px;  /* arriba redondo como sombrerito */
+  border-bottom: 4px solid #ffd166;  /* una rayita amarilla abajo, como si la luz se escapara  */
+}
+
+/* el foco brilla solo cuando la lampara esta encendida (modo claro) */
+.foco {
+  position: absolute;
+  top: 50px;
+  left: 35px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;  /* bolita */
+  background: #ffd166;
+  opacity: 0;  /* apagado por default */
+  box-shadow: 0 0 50px 25px rgba(255, 209, 102, 0.5);  /* el resplandor amarillo */
+  transition: opacity 0.6s;  /* se prende suavecito */
+}
+
+.lampara.encendida .foco {
+  opacity: 1;  /* cuando la lámpara tiene la clase "encendida" (modo claro), el foco se ve */
+}
+
+/* cordon que se jala */
+.cordon {
+  position: absolute;
+  left: 52px;
+  top: 45px;
+  width: 16px;
+  height: 100px;
+  cursor: grab;  /* la manita de "agarrar", para que se sepa que se puede jalar  */
+  touch-action: none;  /* en celular, que el dedo jale el cordón y no haga scroll de la página */
+}
+
+.hilo {
+  position: absolute;
+  left: 7px;
+  top: 0;
+  width: 2px;  /* un hilito finito */
+  height: 60px;  /* su altura cambia con el script cuando lo jalas */
+  background: #9c8aa8;
+  transition: height 0.15s;  /* que se estire con suavidad */
+}
+
+.perilla {
+  position: absolute;
+  left: 0;
+  top: 60px;  /* la bolita al final del hilo, a la altura del hilo */
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffd166;
+  transition: top 0.15s;  /* que baje con el hilo, no de golpe */
+}
+
+.pista-lampara {
+  font-size: 0.9rem;
+  margin: 4px 0 0;
+  opacity: 0.8;  /* un poquito transparente, como pista discreta */
+}
+
+/* celulares normales */
+@media (max-width: 600px) {
+  /* cabecera: título grande a la izquierda, saludo arriba a la derecha, botones centrados abajo */
+  .barra {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 14px 16px;
+  }
+
+  .logo {
+    font-size: 1.8rem;
+  }
+
+  .saludo {
+    margin-left: 0;
+    font-size: 1.2rem;
+    text-align: right;
+  }
+
+  .barra-derecha {
+    grid-column: 1 / -1;  /* ocupa las dos columnas, así queda en su propia fila */
+    justify-content: center;
+  }
+
+    /* filtros: todos visibles; si no caben en una fila, bajan a la siguiente */
+  .filtros {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 10px;
+  }
+
+  .chip {
+    padding: 10px 10px;
+    font-size: 0.85rem;
+  }
+  /* título arriba y botón de nuevo contacto a todo el ancho */
+  .cabecera-agenda {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cabecera-agenda .boton {
+    text-align: center;
+  }
+
+  .grupo-telefono {
+    flex-direction: column;
+  }
+
+  .grupo-telefono select,
+  .grupo-telefono input {
+    width: 100%;
+  }
+
+  .lista {
+    grid-template-columns: 1fr;
+  }
+
+  .centrada {
+    margin: 20px auto;
+  }
+}
+/* autocompletado del navegador en modo oscuro */
+/* (este comentario de arriba quedó un poquito fuera de lugar: lo de abajo es sobre el modo del navegador, no sobre el autocompletado) */
+
+/* le dice al navegador que use colores oscuros en controles nativos (scroll, selects, etc.) */
+:root[data-tema="oscuro"] {
+  color-scheme: dark;  /* las barras de scroll y los menús del navegador se ven oscuros también */
+}
+
+:root[data-tema="claro"] {
+  color-scheme: light;  /* y en claro, claritos */
+}
+
+/* quita el fondo blanco que pone cuando se autocompleta */
+/* cuando el navegador rellena un campo solito, le pone fondo blanco feo; estas reglas lo arreglan para que respete el modo */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--campo) inset; /* pinta el fondo con el color del campo */
+  -webkit-text-fill-color: var(--texto);              /* texto del color (oscuro o claro) */
+  caret-color: var(--texto);                          /* el cursorcito parpadeante, del mismo color */
+  transition: background-color 9999s ease-in-out 0s;  /* truco un tiempo eterno para que el navegador no lo vuelva blanco */
+}
+/* mensaje cuando todavía no hay contactos */
+.vacio {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.vacio p {
+  margin-bottom: 14px;
+}
+/* imagen dentro del boton de modo claro / oscuro, con su texto al lado */
+.img-tema {
+  height: 1.7em;  /* del tamaño del texto del botón */
+  width: auto;
+  vertical-align: middle;
+  margin-right: 0.4em;  /* espacio entre la imagen y el texto */
+}
+.icono-img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+}

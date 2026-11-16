@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- base.html: la plantilla madre Todas las demás páginas se "pegan" aquí y solo cambian el centro -->
+<!-- (el doctype tiene que ir primero, si no el navegador se pone de mal humor y renderiza raro) -->
+<!-- lang="es" le dice al navegador que la página es en español (para que no la traduzca ni la lea con acento gringo 🇲🇽) -->
+<!-- data-tema="claro" es el modo por default; el script de abajo lo cambia si la persona eligió oscuro -->
+<html lang="es" data-tema="claro">
+<head>
+  <meta charset="utf-8">  <!-- acentos y eñes bien escritos (ñ, á, é... sin emojis rotos) -->
+  <!-- se ve bien en telefonos -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- que el celular no se haga el chiquito -->
+  <title>Mi Agenda</title>  <!-- lo que aparece en la pestaña del navegador -->
+  <!-- trae los colores, tamaños y todo lo bonito de la página -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">  <!-- url_for arma bien la ruta del archivo CSS, no tienes que adivinarla -->
+
+  <!-- Modo claro / oscuro: carga la preferencia guardada antes de pintar la pagina -->
+  <!-- así no hay "destello" blanco-negro-blanco al cargar, que es feo y molesta a los ojos -->
+  <script>
+    try {
+      // lee el tema guardado en el navegador (localStorage); si no hay ninguno, usa "claro"
+      document.documentElement.setAttribute("data-tema", localStorage.getItem("tema") || "claro");
+    } catch (e) {
+      // si el navegador no deja leer localStorage (modo privado, por ejemplo), nos vamos con el claro
+      document.documentElement.setAttribute("data-tema", "claro");
+    }
+
+    // dice si el tema actual es claro u oscuro
+    function temaActual() {
+      return document.documentElement.getAttribute("data-tema") || "claro";
+    }
+
+    // pone el tema, lo guarda y actualiza el boton
+    function aplicarTema(tema) {
+      document.documentElement.setAttribute("data-tema", tema);  // cambia los colores de toda la página
+      try {
+        localStorage.setItem("tema", tema);  // lo recuerda para la próxima visita
+      } catch (e) {
+        // si el navegador no deja guardar, no pasa nada
+      }
+      actualizarBotonTema();  // que el botón diga lo que toca ahora
+      // avisa a quien esté escuchando (la lámpara del login) que el tema cambió. Es como un grito en la casa: "¡ya cambió!"
+      document.dispatchEvent(new CustomEvent("temacambiado", { detail: tema }));
+    }
+
+    // cambia entre claro y oscuro (lo usan el boton y la lampara)
+    function cambiarTema() {
+      aplicarTema(temaActual() === "claro" ? "oscuro" : "claro");  // si está claro lo oscurecemos, y viceversa
+    }
+
+    // escribe en el boton la imagen y el texto del modo al que se cambiaria, por ejemplo "☀️Modo claro"
+    function actualizarBotonTema() {
+      const boton = document.getElementById("btn-tema");  // busca el botón por su id
+      if (!boton) return;  // si la página no tiene botón, no hacemos nada
+      const esClaro = temaActual() === "claro";
+      const texto = esClaro ? "Modo oscuro" : "Modo claro";  // el texto que dice el botón
+      const imagen = esClaro ? boton.dataset.imgOscuro : boton.dataset.imgClaro;  // la imagen del modo al que se cambiaría
+      boton.title = texto;  // al pasar el mouse aparece el texto
+      boton.setAttribute("aria-label", texto);  // para lectores de pantalla
+      boton.innerHTML = "";  // borra lo que había antes (imagen y texto anteriores)
+      const img = document.createElement("img");
+      img.src = imagen;
+      img.alt = "";  // el texto ya va al lado, así que la imagen no necesita alt
+      img.className = "img-tema";
+      img.onerror = () => img.remove();  // si la imagen no carga, se quita y solo queda el texto
+      boton.appendChild(img);
+      boton.appendChild(document.createTextNode(texto));  // el texto al lado de la imagen
+    }
+
+    // cuando la página ya está lista, pone el texto correcto en el botón
+    document.addEventListener("DOMContentLoaded", actualizarBotonTema);
+  </script>
+</head>
+<body>
+
+    <!-- barra superior: logo, saludo y botones -->
+  <header class="barra">
+    <!-- el logo te regresa a la agenda -->
+    <a href="{{ url_for('index') }}" class="logo">Mi Agenda</a>
+
+    <!-- el saludo va aparte para poder moverlo en celular (arriba a la derecha) -->
+    {% if current_user.is_authenticated %}
+      <span class="saludo">Hola, {{ current_user.nombre_usuario }}</span>
+    {% endif %}
+
+    <div class="barra-derecha">
+      <!-- boton para cambiar entre modo claro y oscuro -->
+      <button type="button" id="btn-tema" class="boton boton-suave" onclick="cambiarTema()"
+        data-img-claro="{{ url_for('static', filename='img/claro.png') }}"
+        data-img-oscuro="{{ url_for('static', filename='img/oscuro.png') }}">Modo oscuro</button>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}" class="boton boton-suave">Salir</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <!-- mensajes de aviso: los que mandamos con flash() desde app.py -->
+    <!-- get_flashed_messages() saca los mensajes guardados para mostrarlos una sola vez, como el chisme que se cuenta y se olvida -->
+    {% with mensajes = get_flashed_messages() %}
+      {% for mensaje in mensajes %}
+        <div class="aviso">{{ mensaje }}</div>  <!-- cada mensaje en su cajita amarilla -->
+      {% endfor %}
+    {% endwith %}
+
+    <!-- aquí se "pega" el contenido de cada página hija (login, agenda, formularios...) -->
+    {% block contenido %}{% endblock %}
+  </main>
+
+</body>
+</html>

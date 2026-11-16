@@ -1,0 +1,11 @@
+# base de datos local: tiene usuarios y contraseñas encriptadas, no se sube
+instance/
+*.db
+
+# archivos que genera Python o el editor
+__pycache__/
+*.pyc
+.venv/
+venv/
+.vscode/
+.env

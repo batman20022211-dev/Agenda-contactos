@@ -1,0 +1,109 @@
+{% extends "base.html" %}  <!-- hereda todo el esqueleto de base.html (barra, estilos, mensajes) -->
+{% block contenido %}  <!-- aquí empieza lo que se "pega" en el hueco del base -->
+<!-- formulario para entrar -->
+<section class="tarjeta centrada">  <!-- la tarjetita blanca (o oscura) en el centro -->
+
+  <!-- lampara: jalar el cordon cambia entre modo claro (encendida) y oscuro (apagada) -->
+  <!-- sí, la lámpara es un botón. Jala el cordón como en las de antes y ¡listo! -->
+  <div class="zona-lampara">
+    <div class="lampara" id="lampara">  <!-- la lámpara completa; el id es para que el script la encuentre -->
+      <div class="pantalla"></div>  <!-- la pantalla (el sombrerito de la lámpara) -->
+      <div class="foco"></div>  <!-- el foco, que solo brilla cuando el modo es claro -->
+      <!-- el cordón: role="button" y tabindex="0" lo hacen usable con teclado y lectores de pantalla, no solo con el mouse -->
+      <div class="cordon" id="cordon" role="button" tabindex="0" aria-label="Cambiar modo claro u oscuro">
+        <div class="hilo" id="hilo"></div>  <!-- el hilo del cordón, que se estira al jalar -->
+        <div class="perilla" id="perilla"></div>  <!-- la bolita del final del cordón -->
+      </div>
+    </div>
+    <p class="pista-lampara">Jala el cordón para cambiar el modo</p>  <!-- la pista para quien no lo haya adivinado  -->
+  </div>
+
+  <h1>Iniciar sesión</h1>
+  <!-- method="post" manda los datos a escondidas (no se ven en la URL). Lo recibe la ruta /login de app.py -->
+  <form method="post" class="formulario">
+    <label>Usuario
+      <!-- required: el navegador no deja mandar el formulario vacío -->
+      <input type="text" name="nombre_usuario" required>  <!-- el name es el nombre con el que app.py lo recibe: request.form["nombre_usuario"] -->
+    </label>
+    <label>Contraseña
+      <input type="password" name="password" required>  <!-- type="password" oculta lo que escribes con puntitos  -->
+    </label>
+    <button class="boton" type="submit">Entrar</button>  <!-- al darle clic, se manda el formulario -->
+  </form>
+  <!-- url_for('registro') es la ruta de la página de registro, por si todavía no tienes cuenta -->
+  <p class="texto-centro">¿No tienes cuenta? <a href="{{ url_for('registro') }}">Regístrate aquí</a></p>
+</section>
+
+<script>
+  // elementos de la lampara: los buscamos una vez y los guardamos en variables para no buscarlos a cada rato
+  const lampara = document.getElementById("lampara");
+  const cordon = document.getElementById("cordon");
+  const hilo = document.getElementById("hilo");
+  const perilla = document.getElementById("perilla");
+
+  const LARGO = 60;   // largo del cordon sin jalar (px)
+  const UMBRAL = 40;  // cuanto hay que jalar para cambiar el modo (px). Menos que esto y el cordón solo se queja 
+  let arrastrando = false;  // ¿la persona tiene el cordón agarrado ahorita?
+  let inicioY = 0;  // en qué altura (en la pantalla) empezó el jalón
+  let delta = 0;  // cuánto lo llevamos jalado hasta ahorita
+
+  // mueve el cordon hacia abajo: cambia la altura del hilo y la posición de la perilla juntas
+  function moverCordon(d) {
+    hilo.style.height = (LARGO + d) + "px";
+    perilla.style.top = (LARGO + d) + "px";
+  }
+
+  // la lampara se prende si el modo es claro
+  function pintarLampara(tema) {
+    lampara.classList.toggle("encendida", tema === "claro");  // agrega o quita la clase según el tema: claro = prendida
+  }
+
+  pintarLampara(temaActual());  // al cargar la página, la lámpara arranca según el tema que haya
+  // y cada vez que alguien cambie el tema (el botón de arriba, por ejemplo), la lámpara se entera y se prende o apaga
+  document.addEventListener("temacambiado", (e) => pintarLampara(e.detail));
+
+  // el dedo (o mouse) toca el cordón: empezamos a jalar y guardamos dónde empezó
+  cordon.addEventListener("pointerdown", (e) => {
+    arrastrando = true;
+    inicioY = e.clientY;  // altura del toque
+    delta = 0;
+    cordon.setPointerCapture(e.pointerId);  // "amarramos" el puntero al cordón para que no se escape si nos salimos un poquito 
+  });
+
+  // mientras se mueve el dedo/mouse con el cordón agarrado: calculamos cuánto se jaló
+  cordon.addEventListener("pointermove", (e) => {
+    if (!arrastrando) return;  // si no lo tenemos agarrado, no hacemos nada
+    delta = e.clientY - inicioY;  // cuánto bajó respecto al inicio
+    // Math.max/Math.min lo dejan entre 0 y UMBRAL: ni para arriba ni para abajo más de lo permitido
+    moverCordon(Math.max(0, Math.min(UMBRAL, delta)));
+  });
+
+  // al soltar: si lo jalaste lo suficiente o solo lo tocaste, cambia el modo
+  function soltarCordon() {
+    if (!arrastrando) return;  // si no lo estábamos jalando, no hay nada que soltar
+    arrastrando = false;
+    const jalado = delta >= UMBRAL;  // ¿lo jalaste de verdad?
+    const toque = Math.abs(delta) < 5;  // ¿nomás lo tocaste? (menos de 5 px de movimiento)
+    if (jalado || toque) {
+      moverCordon(UMBRAL);  // lo dejamos abajo en el jalón completo
+      cambiarTema();  // ¡cambia el modo!
+      setTimeout(() => moverCordon(0), 200);  // 200 milisegundos después, el cordón regresa a su lugar como resorte 
+    } else {
+      moverCordon(0);  // no lo jalaste lo suficiente: se regresa sin cambiar nada
+    }
+    delta = 0;  // limpiamos para el siguiente jalón
+  }
+
+  // soltar el dedo/mouse, o que el sistema cancele el gesto (pointercancel), tienen el mismo efecto
+  cordon.addEventListener("pointerup", soltarCordon);
+  cordon.addEventListener("pointercancel", soltarCordon);
+
+  // tambien se puede usar con teclado (Enter o espacio), por si alguien no usa el mouse ⌨
+  cordon.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();  // que la tecla espacio no haga scroll de la página
+      cambiarTema();
+    }
+  });
+</script>
+{% endblock %}  <!-- aquí termina el hueco; todo lo de arriba es lo que se pega en base.html -->
